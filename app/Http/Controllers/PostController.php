@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+use App\Http\Requests\StorePost;
 
 use Illuminate\Http\Request;
 use \App\Post;
@@ -32,18 +33,14 @@ class PostController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(StorePost $request)
     {
-        $validedata=$request->validate([
-            'title'=>"required|min:4|max:50",
-            'content'=>"required|min:4|max:50"
-        ]);
-       $post= new Post;
-     
-       $post->title=$request->input('title');
-       $post->content=$request->input('content');
-       $post->active=false;
-       $post->slug="test-par-default";
+      
+       $data= $request->only(['title','content']);
+       $data['slug']="default-slug";
+       $data['active']=false;
+       $post=Post::create($data);
+
        $post->save();
        $request->session()->flash('statut','post is add with succes');
        return redirect()->route('posts.index');
@@ -69,7 +66,8 @@ class PostController extends Controller
      */
     public function edit($id)
     {
-        //
+        $post=Post::findOrfail($id);
+        return view('posts.edit',['post'=>$post]);
     }
 
     /**
@@ -79,9 +77,17 @@ class PostController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(StorePost $request, $id)
     {
-        //
+        $post=Post::findOrfail($id);
+        $post->title=$request->input('title');
+        $post->content=$request->input('content');
+        $post->active=true;
+        $request->session()->flash('statut','post was updated');
+        $post->save();
+
+        return redirect()->route('posts.index');
+
     }
 
     /**
@@ -90,8 +96,11 @@ class PostController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Request $request, $id)
     {
-        //
+       \App\Post::destroy($id);
+
+       $request->session()->flash('statut','post was deleted');
+       return redirect()->route('posts.index');
     }
 }

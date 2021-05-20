@@ -4,14 +4,14 @@
 
 <form method="POST" action="{{ Route('posts.store') }}">
  @csrf
-    <div>
+    <div class="form-group">
         <layout>Title : </layout>
-        <input type="text" name="title">
+        <input class="form-control" type="text" name="title" value="{{ old('title') }}">
         <layout> Content</layout >
-        <input type="text" name="content">
+        <input   class="form-control" type="text" name="content"  value="{{ old('content') }}">
     </div>
     <div>
-        <input type="submit" value="Add post">
+        <input class="btn btn-success" type="submit" value="Add post">
     </div>
     <ul>
         @foreach($errors->all() as $error)
